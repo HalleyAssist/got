@@ -2,13 +2,13 @@ import {Buffer} from 'node:buffer';
 import {promisify} from 'node:util';
 import net from 'node:net';
 import http from 'node:http';
-import stream from 'node:stream';
+import stream, { Duplex } from 'node:stream';
 import {pipeline as streamPipeline} from 'node:stream/promises';
 import {Agent} from 'node:https';
 import test from 'ava';
 import getStream from 'get-stream';
 import is from '@sindresorhus/is';
-import got, {RequestError, HTTPError, TimeoutError} from '../source/index.js';
+import got, {RequestError, HTTPError, TimeoutError, NativeRequestOptions} from '../source/index.js';
 import type Request from '../source/core/index.js';
 import withServer from './helpers/with-server.js';
 import invalidUrl from './helpers/invalid-url.js';
@@ -386,7 +386,7 @@ test('should wrap got cause', async t => {
 
 test('should wrap non-got cause', async t => {
 	class SocksProxyAgent extends Agent {
-		createConnection() {
+		override createConnection(_options: NativeRequestOptions, _oncreate: (error: Error | null, stream: Duplex) => void): Duplex {
 			throw new SocksClientError('oh no');
 		}
 	}

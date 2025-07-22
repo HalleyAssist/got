@@ -14,8 +14,10 @@ import got, {
 	HTTPError,
 	type Response,
 	type OptionsInit,
+	NativeRequestOptions,
 } from '../source/index.js';
 import withServer from './helpers/with-server.js';
+import { Duplex } from 'node:stream';
 
 const errorString = 'oops';
 const error = new Error(errorString);
@@ -1333,10 +1335,10 @@ test('can retry without an agent', withServer, async (t, server, got) => {
 	let counter = 0;
 
 	class MyAgent extends HttpAgent {
-		createConnection(port: any, options: any, callback: any) {
+		override createConnection(options: NativeRequestOptions, callback: (error: Error | null, stream: Duplex) => void): Duplex {
 			counter++;
 
-			return (HttpAgent as any).prototype.createConnection.call(this, port, options, callback);
+			return (HttpAgent as any).prototype.createConnection.call(this, options, callback);
 		}
 	}
 
